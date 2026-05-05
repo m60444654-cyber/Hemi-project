@@ -1,0 +1,891 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@400;600;700&display=swap');
+
+  :root {
+    --tf-bg: var(--color-background-secondary);
+    --tf-card: var(--color-background-primary);
+    --tf-border: var(--color-border-tertiary);
+    --tf-muted: var(--color-text-secondary);
+    --tf-primary: var(--color-text-primary);
+    --tf-mono: 'IBM Plex Mono', monospace;
+    --tf-display: 'Syne', sans-serif;
+    --tf-purple: #7F77DD;
+    --tf-teal: #1D9E75;
+    --tf-amber: #BA7517;
+    --tf-coral: #D85A30;
+    --tf-blue: #378ADD;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  .tf-root {
+    font-family: var(--tf-display);
+    color: var(--tf-primary);
+    padding: 0 0 2rem;
+  }
+
+  .tf-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 0.5px solid var(--tf-border);
+  }
+
+  .tf-logo {
+    font-family: var(--tf-display);
+    font-weight: 700;
+    font-size: 22px;
+    letter-spacing: -0.5px;
+    color: var(--tf-purple);
+  }
+
+  .tf-badge {
+    font-family: var(--tf-mono);
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: var(--color-background-info);
+    color: var(--color-text-info);
+  }
+
+  .tf-tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 1.5rem;
+    border-bottom: 0.5px solid var(--tf-border);
+    padding-bottom: 0;
+    overflow-x: auto;
+  }
+
+  .tf-tab {
+    font-family: var(--tf-display);
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--tf-muted);
+    background: none;
+    border: none;
+    padding: 8px 14px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .tf-tab:hover { color: var(--tf-primary); }
+  .tf-tab.active {
+    color: var(--tf-purple);
+    border-bottom-color: var(--tf-purple);
+    font-weight: 600;
+  }
+
+  .tf-panel { display: none; }
+  .tf-panel.active { display: block; }
+
+  /* File tree */
+  .file-tree {
+    font-family: var(--tf-mono);
+    font-size: 12px;
+    line-height: 1.7;
+    background: var(--tf-bg);
+    border: 0.5px solid var(--tf-border);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    overflow-x: auto;
+  }
+
+  .ft-dir { color: var(--tf-blue); font-weight: 500; }
+  .ft-file { color: var(--tf-primary); }
+  .ft-comment { color: var(--tf-muted); }
+  .ft-new { color: var(--tf-teal); }
+  .ft-icon { opacity: 0.6; margin-right: 4px; }
+  .ft-line { display: flex; align-items: center; padding: 1px 0; cursor: default; }
+  .ft-line:hover { background: var(--color-background-secondary); border-radius: 3px; }
+
+  /* Sections */
+  .tf-section-title {
+    font-family: var(--tf-display);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--tf-muted);
+    margin: 1.5rem 0 0.75rem;
+  }
+
+  /* Layer cards */
+  .layer-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 12px;
+    margin-bottom: 1.5rem;
+  }
+
+  .layer-card {
+    background: var(--tf-card);
+    border: 0.5px solid var(--tf-border);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+  }
+
+  .layer-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .layer-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .layer-name {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: -0.2px;
+  }
+
+  .layer-desc {
+    font-size: 12px;
+    color: var(--tf-muted);
+    line-height: 1.55;
+    margin-bottom: 10px;
+  }
+
+  .layer-files {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .layer-file {
+    font-family: var(--tf-mono);
+    font-size: 11px;
+    color: var(--tf-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .layer-file-dot {
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: var(--tf-muted);
+    flex-shrink: 0;
+  }
+
+  /* Code blocks */
+  .code-block {
+    font-family: var(--tf-mono);
+    font-size: 11.5px;
+    line-height: 1.65;
+    background: var(--tf-bg);
+    border: 0.5px solid var(--tf-border);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    overflow-x: auto;
+    margin-bottom: 1rem;
+  }
+
+  .code-block .kw { color: var(--tf-purple); font-weight: 500; }
+  .code-block .fn { color: var(--tf-teal); }
+  .code-block .str { color: var(--tf-amber); }
+  .code-block .cm { color: var(--tf-muted); }
+  .code-block .ty { color: var(--tf-blue); }
+  .code-block .op { color: var(--tf-coral); }
+
+  .code-filename {
+    font-family: var(--tf-mono);
+    font-size: 11px;
+    color: var(--tf-muted);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .code-filename::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--tf-teal);
+  }
+
+  /* Principle cards */
+  .principle-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 10px;
+    margin-bottom: 1.5rem;
+  }
+
+  .principle-card {
+    background: var(--tf-card);
+    border: 0.5px solid var(--tf-border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    border-left: 2px solid transparent;
+  }
+
+  .principle-card.purple { border-left-color: var(--tf-purple); }
+  .principle-card.teal { border-left-color: var(--tf-teal); }
+  .principle-card.amber { border-left-color: var(--tf-amber); }
+  .principle-card.coral { border-left-color: var(--tf-coral); }
+  .principle-card.blue { border-left-color: var(--tf-blue); }
+
+  .principle-num {
+    font-family: var(--tf-mono);
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--tf-muted);
+    margin-bottom: 4px;
+  }
+
+  .principle-title {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  .principle-desc {
+    font-size: 12px;
+    color: var(--tf-muted);
+    line-height: 1.5;
+  }
+
+  /* Diff view */
+  .diff-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 1rem;
+  }
+
+  .diff-before, .diff-after {
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-family: var(--tf-mono);
+    font-size: 11px;
+    line-height: 1.65;
+    border: 0.5px solid var(--tf-border);
+  }
+
+  .diff-before { background: var(--color-background-danger); }
+  .diff-after { background: var(--color-background-success); }
+
+  .diff-label {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .diff-before .diff-label { color: var(--color-text-danger); }
+  .diff-after .diff-label { color: var(--color-text-success); }
+
+  /* Steps */
+  .step-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 1.5rem;
+  }
+
+  .step-item {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+
+  .step-num {
+    font-family: var(--tf-mono);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--tf-muted);
+    background: var(--tf-bg);
+    border: 0.5px solid var(--tf-border);
+    border-radius: 4px;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .step-content { flex: 1; }
+  .step-title {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 3px;
+  }
+  .step-desc {
+    font-size: 12px;
+    color: var(--tf-muted);
+    line-height: 1.55;
+  }
+
+  .tf-note {
+    font-size: 12px;
+    color: var(--tf-muted);
+    background: var(--tf-bg);
+    border: 0.5px solid var(--tf-border);
+    border-radius: 6px;
+    padding: 10px 14px;
+    line-height: 1.55;
+    margin-top: 1rem;
+  }
+
+  code {
+    font-family: var(--tf-mono);
+    font-size: 11px;
+    background: var(--tf-bg);
+    border: 0.5px solid var(--tf-border);
+    border-radius: 3px;
+    padding: 1px 5px;
+  }
+
+  .ask-btn {
+    font-family: var(--tf-display);
+    font-size: 12px;
+    padding: 6px 14px;
+    border-radius: 6px;
+    border: 0.5px solid var(--color-border-secondary);
+    background: none;
+    color: var(--tf-muted);
+    cursor: pointer;
+    transition: all 0.12s;
+    margin-top: 1rem;
+    display: inline-block;
+  }
+  .ask-btn:hover { background: var(--tf-bg); color: var(--tf-primary); }
+
+  @media (max-width: 500px) {
+    .diff-row { grid-template-columns: 1fr; }
+    .layer-grid { grid-template-columns: 1fr; }
+    .principle-grid { grid-template-columns: 1fr; }
+  }
+</style>
+
+<div class="tf-root">
+  <h2 class="sr-only">TimeFlow Project Restructuring Guide — architecture, code patterns, and migration steps</h2>
+
+  <div class="tf-header">
+    <span class="tf-logo">TimeFlow</span>
+    <span class="tf-badge">Architecture Guide</span>
+  </div>
+
+  <div class="tf-tabs">
+    <button class="tf-tab active" onclick="showTab('structure')">Folder structure</button>
+    <button class="tf-tab" onclick="showTab('layers')">Layered architecture</button>
+    <button class="tf-tab" onclick="showTab('code')">Key file examples</button>
+    <button class="tf-tab" onclick="showTab('principles')">12 principles</button>
+    <button class="tf-tab" onclick="showTab('migration')">Migration steps</button>
+  </div>
+
+  <!-- STRUCTURE TAB -->
+  <div id="tab-structure" class="tf-panel active">
+    <div class="tf-section-title">Backend — new structure</div>
+    <div class="file-tree">
+<span class="ft-line"><span class="ft-dir">backend/src/</span></span>
+<span class="ft-line">  <span class="ft-dir ft-new">common/</span></span>
+<span class="ft-line">    <span class="ft-file">  errors.ts</span> <span class="ft-comment">   &larr; custom error classes</span></span>
+<span class="ft-line">    <span class="ft-file">  response.ts</span></span>
+<span class="ft-line">    <span class="ft-file">  types.ts</span> <span class="ft-comment">     &larr; shared TS interfaces</span></span>
+<span class="ft-line">    <span class="ft-file">  constants.ts</span></span>
+<span class="ft-line">  <span class="ft-dir">config/</span></span>
+<span class="ft-line">    <span class="ft-file">  database.ts</span></span>
+<span class="ft-line">    <span class="ft-file">  redis.ts</span></span>
+<span class="ft-line">    <span class="ft-file">  jwt.ts</span> <span class="ft-comment">       &larr; split per concern</span></span>
+<span class="ft-line">    <span class="ft-file">  env.ts</span> <span class="ft-comment">       &larr; validated env vars</span></span>
+<span class="ft-line">  <span class="ft-dir">middleware/</span></span>
+<span class="ft-line">    <span class="ft-file">  authenticate.ts</span></span>
+<span class="ft-line">    <span class="ft-file">  validate.ts</span></span>
+<span class="ft-line">    <span class="ft-file">  rateLimiter.ts</span></span>
+<span class="ft-line">    <span class="ft-file">  errorHandler.ts</span></span>
+<span class="ft-line">    <span class="ft-file ft-new">  compose.ts</span> <span class="ft-comment">  &larr; middleware chains</span></span>
+<span class="ft-line">  <span class="ft-dir">modules/</span></span>
+<span class="ft-line">    <span class="ft-dir">  auth/</span></span>
+<span class="ft-line">        <span class="ft-file">  auth.router.ts</span></span>
+<span class="ft-line">        <span class="ft-file">  auth.controller.ts</span> <span class="ft-comment">&larr; thin</span></span>
+<span class="ft-line">        <span class="ft-file ft-new">  auth.service.ts</span> <span class="ft-comment">  &larr; business logic</span></span>
+<span class="ft-line">        <span class="ft-file">  auth.schemas.ts</span></span>
+<span class="ft-line">        <span class="ft-file ft-new">  auth.types.ts</span></span>
+<span class="ft-line">    <span class="ft-dir">  tasks/</span></span>
+<span class="ft-line">        <span class="ft-file">  tasks.router.ts</span></span>
+<span class="ft-line">        <span class="ft-file">  tasks.controller.ts</span></span>
+<span class="ft-line">        <span class="ft-file ft-new">  tasks.service.ts</span></span>
+<span class="ft-line">        <span class="ft-file ft-new">  tasks.repository.ts</span> <span class="ft-comment">&larr; DB access only</span></span>
+<span class="ft-line">        <span class="ft-file">  tasks.schemas.ts</span></span>
+<span class="ft-line">        <span class="ft-file ft-new">  tasks.types.ts</span></span>
+<span class="ft-line">    <span class="ft-dir">  events/</span> <span class="ft-comment"> (same pattern)</span></span>
+<span class="ft-line">    <span class="ft-dir">  habits/</span> <span class="ft-comment"> (same pattern)</span></span>
+<span class="ft-line">    <span class="ft-dir">  analytics/</span> <span class="ft-comment"> (same pattern)</span></span>
+<span class="ft-line">  <span class="ft-dir">utils/</span></span>
+<span class="ft-line">    <span class="ft-file">  bcrypt.ts</span></span>
+<span class="ft-line">    <span class="ft-file">  jwt.ts</span></span>
+<span class="ft-line">    <span class="ft-file ft-new">  index.ts</span> <span class="ft-comment">   &larr; barrel export</span></span>
+    </div>
+
+    <div class="tf-section-title">Frontend — new structure</div>
+    <div class="file-tree">
+<span class="ft-line"><span class="ft-dir">frontend/</span></span>
+<span class="ft-line">  <span class="ft-dir">app/</span></span>
+<span class="ft-line">    <span class="ft-dir">  (app)/</span></span>
+<span class="ft-line">      <span class="ft-dir">  tasks/</span></span>
+<span class="ft-line">          <span class="ft-file">  page.tsx</span></span>
+<span class="ft-line">          <span class="ft-file ft-new">  components/</span> <span class="ft-comment">&larr; route-scoped</span></span>
+<span class="ft-line">          <span class="ft-file ft-new">  hooks/</span> <span class="ft-comment">     &larr; useTasks.ts etc.</span></span>
+<span class="ft-line">          <span class="ft-file ft-new">  types.ts</span></span>
+<span class="ft-line">      <span class="ft-dir">  dashboard/</span> <span class="ft-comment"> (same pattern)</span></span>
+<span class="ft-line">      <span class="ft-dir">  calendar/</span> <span class="ft-comment"> (same pattern)</span></span>
+<span class="ft-line">      <span class="ft-dir">  habits/</span> <span class="ft-comment"> (same pattern)</span></span>
+<span class="ft-line">  <span class="ft-dir">components/</span></span>
+<span class="ft-line">    <span class="ft-dir">  ui/</span> <span class="ft-comment">       &larr; primitives only</span></span>
+<span class="ft-line">    <span class="ft-dir">  shared/</span> <span class="ft-comment">   &larr; cross-feature</span></span>
+<span class="ft-line">    <span class="ft-file">  index.ts</span> <span class="ft-comment">  &larr; barrel export</span></span>
+<span class="ft-line">  <span class="ft-dir ft-new">services/</span> <span class="ft-comment">    &larr; API call functions</span></span>
+<span class="ft-line">    <span class="ft-file">  tasks.service.ts</span></span>
+<span class="ft-line">    <span class="ft-file">  auth.service.ts</span></span>
+<span class="ft-line">    <span class="ft-file">  index.ts</span></span>
+<span class="ft-line">  <span class="ft-dir ft-new">hooks/</span> <span class="ft-comment">       &larr; global hooks</span></span>
+<span class="ft-line">    <span class="ft-file">  useAuth.ts</span></span>
+<span class="ft-line">    <span class="ft-file">  useDebounce.ts</span></span>
+<span class="ft-line">    <span class="ft-file">  index.ts</span></span>
+<span class="ft-line">  <span class="ft-dir ft-new">types/</span> <span class="ft-comment">       &larr; shared TS types</span></span>
+<span class="ft-line">    <span class="ft-file">  api.types.ts</span></span>
+<span class="ft-line">    <span class="ft-file">  index.ts</span></span>
+<span class="ft-line">  <span class="ft-file ft-new">middleware.ts</span> <span class="ft-comment"> &larr; Next.js route protection</span></span>
+    </div>
+  </div>
+
+  <!-- LAYERS TAB -->
+  <div id="tab-layers" class="tf-panel">
+    <div class="tf-section-title">Backend request lifecycle</div>
+    <div class="layer-grid">
+      <div class="layer-card">
+        <div class="layer-card-header">
+          <div class="layer-dot" style="background:#378ADD"></div>
+          <span class="layer-name">Router</span>
+        </div>
+        <p class="layer-desc">Declares routes and chains middleware. No logic — delegates immediately to the controller.</p>
+        <div class="layer-files">
+          <span class="layer-file"><span class="layer-file-dot"></span>auth.router.ts</span>
+          <span class="layer-file"><span class="layer-file-dot"></span>tasks.router.ts</span>
+        </div>
+      </div>
+      <div class="layer-card">
+        <div class="layer-card-header">
+          <div class="layer-dot" style="background:#7F77DD"></div>
+          <span class="layer-name">Controller</span>
+        </div>
+        <p class="layer-desc">Thin HTTP layer — extract params, call service, send response. No DB or business logic here.</p>
+        <div class="layer-files">
+          <span class="layer-file"><span class="layer-file-dot"></span>auth.controller.ts</span>
+          <span class="layer-file"><span class="layer-file-dot"></span>tasks.controller.ts</span>
+        </div>
+      </div>
+      <div class="layer-card">
+        <div class="layer-card-header">
+          <div class="layer-dot" style="background:#1D9E75"></div>
+          <span class="layer-name">Service</span>
+        </div>
+        <p class="layer-desc">All business rules live here. Orchestrates repositories. Throws domain errors, not HTTP errors.</p>
+        <div class="layer-files">
+          <span class="layer-file"><span class="layer-file-dot"></span>auth.service.ts</span>
+          <span class="layer-file"><span class="layer-file-dot"></span>tasks.service.ts</span>
+        </div>
+      </div>
+      <div class="layer-card">
+        <div class="layer-card-header">
+          <div class="layer-dot" style="background:#D85A30"></div>
+          <span class="layer-name">Repository</span>
+        </div>
+        <p class="layer-desc">Only Prisma calls. Returns domain objects. Swapping the ORM means touching only this layer.</p>
+        <div class="layer-files">
+          <span class="layer-file"><span class="layer-file-dot"></span>tasks.repository.ts</span>
+          <span class="layer-file"><span class="layer-file-dot"></span>habits.repository.ts</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tf-section-title">Frontend data lifecycle</div>
+    <div class="layer-grid">
+      <div class="layer-card">
+        <div class="layer-card-header">
+          <div class="layer-dot" style="background:#378ADD"></div>
+          <span class="layer-name">Page component</span>
+        </div>
+        <p class="layer-desc">Calls React Query hooks, passes data to dumb components. Handles loading/error states only.</p>
+      </div>
+      <div class="layer-card">
+        <div class="layer-card-header">
+          <div class="layer-dot" style="background:#7F77DD"></div>
+          <span class="layer-name">Query hooks</span>
+        </div>
+        <p class="layer-desc"><code>useTasks.ts</code>, <code>useHabits.ts</code> — wrap React Query. No fetch logic inside components.</p>
+      </div>
+      <div class="layer-card">
+        <div class="layer-card-header">
+          <div class="layer-dot" style="background:#1D9E75"></div>
+          <span class="layer-name">Service functions</span>
+        </div>
+        <p class="layer-desc">Pure async functions calling the API via axios. No state, no hooks — just returns data.</p>
+      </div>
+      <div class="layer-card">
+        <div class="layer-card-header">
+          <div class="layer-dot" style="background:#D85A30"></div>
+          <span class="layer-name">Axios instance</span>
+        </div>
+        <p class="layer-desc">Centralized interceptors for auth token injection and automatic token refresh on 401.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- CODE TAB -->
+  <div id="tab-code" class="tf-panel">
+
+    <div class="tf-section-title">tasks.repository.ts — only DB access</div>
+    <div class="code-filename">backend/src/modules/tasks/tasks.repository.ts</div>
+    <div class="code-block"><span class="kw">import</span> { prisma } <span class="kw">from</span> <span class="str">'../../config/database'</span>;
+<span class="kw">import</span> { <span class="ty">TaskFilters</span>, <span class="ty">CreateTaskInput</span> } <span class="kw">from</span> <span class="str">'./tasks.types'</span>;
+
+<span class="kw">export const</span> <span class="fn">TaskRepository</span> = {
+  <span class="kw">async</span> <span class="fn">findMany</span>(userId: <span class="ty">string</span>, filters: <span class="ty">TaskFilters</span>) {
+    <span class="kw">const</span> where = { userId, ...buildWhereClause(filters) };
+    <span class="kw">return</span> prisma.task.<span class="fn">findMany</span>({ where, orderBy: [{ order: <span class="str">'asc'</span> }] });
+  },
+  <span class="kw">async</span> <span class="fn">create</span>(userId: <span class="ty">string</span>, data: <span class="ty">CreateTaskInput</span>) {
+    <span class="kw">return</span> prisma.task.<span class="fn">create</span>({ data: { ...data, userId } });
+  },
+  <span class="kw">async</span> <span class="fn">findByIdAndUser</span>(id: <span class="ty">string</span>, userId: <span class="ty">string</span>) {
+    <span class="kw">return</span> prisma.task.<span class="fn">findFirst</span>({ where: { id, userId } });
+  },
+  <span class="kw">async</span> <span class="fn">update</span>(id: <span class="ty">string</span>, data: <span class="ty">Partial&lt;CreateTaskInput&gt;</span>) {
+    <span class="kw">return</span> prisma.task.<span class="fn">update</span>({ where: { id }, data });
+  },
+  <span class="kw">async</span> <span class="fn">delete</span>(id: <span class="ty">string</span>) {
+    <span class="kw">return</span> prisma.task.<span class="fn">delete</span>({ where: { id } });
+  },
+};</div>
+
+    <div class="tf-section-title">tasks.service.ts — business logic only</div>
+    <div class="code-filename">backend/src/modules/tasks/tasks.service.ts</div>
+    <div class="code-block"><span class="kw">import</span> { <span class="ty">TaskRepository</span> } <span class="kw">from</span> <span class="str">'./tasks.repository'</span>;
+<span class="kw">import</span> { <span class="ty">NotFoundError</span>, <span class="ty">ForbiddenError</span> } <span class="kw">from</span> <span class="str">'../../common/errors'</span>;
+<span class="kw">import</span> { <span class="ty">CreateTaskInput</span> } <span class="kw">from</span> <span class="str">'./tasks.types'</span>;
+
+<span class="kw">export const</span> <span class="fn">TaskService</span> = {
+  <span class="kw">async</span> <span class="fn">getAll</span>(userId: <span class="ty">string</span>, filters) {
+    <span class="kw">return</span> TaskRepository.<span class="fn">findMany</span>(userId, filters);
+  },
+  <span class="kw">async</span> <span class="fn">create</span>(userId: <span class="ty">string</span>, input: <span class="ty">CreateTaskInput</span>) {
+    <span class="kw">const</span> maxOrder = <span class="kw">await</span> TaskRepository.<span class="fn">getMaxOrder</span>(userId);
+    <span class="kw">return</span> TaskRepository.<span class="fn">create</span>(userId, { ...input, order: maxOrder + 1 });
+  },
+  <span class="kw">async</span> <span class="fn">delete</span>(id: <span class="ty">string</span>, userId: <span class="ty">string</span>) {
+    <span class="kw">const</span> task = <span class="kw">await</span> TaskRepository.<span class="fn">findByIdAndUser</span>(id, userId);
+    <span class="kw">if</span> (!task) <span class="kw">throw new</span> <span class="fn">NotFoundError</span>(<span class="str">'Task not found'</span>);
+    <span class="kw">return</span> TaskRepository.<span class="fn">delete</span>(id);
+  },
+};</div>
+
+    <div class="tf-section-title">common/errors.ts — typed error hierarchy</div>
+    <div class="code-filename">backend/src/common/errors.ts</div>
+    <div class="code-block"><span class="kw">export class</span> <span class="ty">AppError</span> <span class="kw">extends</span> Error {
+  <span class="kw">constructor</span>(<span class="kw">public</span> message: <span class="ty">string</span>, <span class="kw">public</span> statusCode: <span class="ty">number</span>, <span class="kw">public</span> code: <span class="ty">string</span>) {
+    <span class="kw">super</span>(message);
+    this.name = this.constructor.name;
+  }
+}
+<span class="kw">export class</span> <span class="ty">NotFoundError</span> <span class="kw">extends</span> <span class="ty">AppError</span> {
+  <span class="kw">constructor</span>(message = <span class="str">'Resource not found'</span>) { <span class="kw">super</span>(message, 404, <span class="str">'NOT_FOUND'</span>); }
+}
+<span class="kw">export class</span> <span class="ty">UnauthorizedError</span> <span class="kw">extends</span> <span class="ty">AppError</span> {
+  <span class="kw">constructor</span>(message = <span class="str">'Unauthorized'</span>) { <span class="kw">super</span>(message, 401, <span class="str">'UNAUTHORIZED'</span>); }
+}
+<span class="kw">export class</span> <span class="ty">ForbiddenError</span> <span class="kw">extends</span> <span class="ty">AppError</span> {
+  <span class="kw">constructor</span>(message = <span class="str">'Forbidden'</span>) { <span class="kw">super</span>(message, 403, <span class="str">'FORBIDDEN'</span>); }
+}
+<span class="kw">export class</span> <span class="ty">ConflictError</span> <span class="kw">extends</span> <span class="ty">AppError</span> {
+  <span class="kw">constructor</span>(message = <span class="str">'Conflict'</span>) { <span class="kw">super</span>(message, 409, <span class="str">'CONFLICT'</span>); }
+}</div>
+
+    <div class="tf-section-title">services/tasks.service.ts — frontend API layer</div>
+    <div class="code-filename">frontend/services/tasks.service.ts</div>
+    <div class="code-block"><span class="kw">import</span> api <span class="kw">from</span> <span class="str">'@/lib/api'</span>;
+<span class="kw">import type</span> { <span class="ty">Task</span>, <span class="ty">CreateTaskInput</span>, <span class="ty">TaskFilters</span> } <span class="kw">from</span> <span class="str">'@/types'</span>;
+
+<span class="kw">export const</span> <span class="fn">TasksService</span> = {
+  <span class="fn">getAll</span>: (filters?: <span class="ty">TaskFilters</span>) =>
+    api.<span class="fn">get</span>&lt;<span class="ty">{ tasks: Task[] }</span>&gt;(<span class="str">'/tasks'</span>, { params: filters }).<span class="fn">then</span>(r => r.data.data),
+
+  <span class="fn">create</span>: (input: <span class="ty">CreateTaskInput</span>) =>
+    api.<span class="fn">post</span>&lt;<span class="ty">Task</span>&gt;(<span class="str">'/tasks'</span>, input).<span class="fn">then</span>(r => r.data.data),
+
+  <span class="fn">updateStatus</span>: (id: <span class="ty">string</span>, status: <span class="ty">TaskStatus</span>) =>
+    api.<span class="fn">patch</span>(<span class="str">`/tasks/${id}/status`</span>, { status }).<span class="fn">then</span>(r => r.data),
+
+  <span class="fn">delete</span>: (id: <span class="ty">string</span>) =>
+    api.<span class="fn">delete</span>(<span class="str">`/tasks/${id}`</span>).<span class="fn">then</span>(r => r.data),
+};</div>
+
+    <div class="tf-section-title">hooks/useTasks.ts — React Query hook</div>
+    <div class="code-filename">frontend/app/(app)/tasks/hooks/useTasks.ts</div>
+    <div class="code-block"><span class="kw">import</span> { useQuery, useMutation, useQueryClient } <span class="kw">from</span> <span class="str">'@tanstack/react-query'</span>;
+<span class="kw">import</span> { TasksService } <span class="kw">from</span> <span class="str">'@/services'</span>;
+
+<span class="kw">export const</span> <span class="fn">useTasks</span> = (filters?) => {
+  <span class="kw">return</span> <span class="fn">useQuery</span>({
+    queryKey: [<span class="str">'tasks'</span>, filters],
+    queryFn: () => TasksService.<span class="fn">getAll</span>(filters),
+    staleTime: 1000 * 60 * 2,
+  });
+};
+
+<span class="kw">export const</span> <span class="fn">useCreateTask</span> = () => {
+  <span class="kw">const</span> qc = <span class="fn">useQueryClient</span>();
+  <span class="kw">return</span> <span class="fn">useMutation</span>({
+    mutationFn: TasksService.create,
+    onSuccess: () => qc.<span class="fn">invalidateQueries</span>({ queryKey: [<span class="str">'tasks'</span>] }),
+  });
+};</div>
+
+    <div class="tf-section-title">middleware.ts — Next.js route protection</div>
+    <div class="code-filename">frontend/middleware.ts</div>
+    <div class="code-block"><span class="kw">import</span> { <span class="ty">NextResponse</span> } <span class="kw">from</span> <span class="str">'next/server'</span>;
+<span class="kw">import type</span> { <span class="ty">NextRequest</span> } <span class="kw">from</span> <span class="str">'next/server'</span>;
+
+<span class="kw">const</span> PUBLIC_ROUTES = [<span class="str">'/login'</span>, <span class="str">'/register'</span>, <span class="str">'/forgot-password'</span>];
+
+<span class="kw">export function</span> <span class="fn">middleware</span>(req: <span class="ty">NextRequest</span>) {
+  <span class="kw">const</span> token = req.cookies.<span class="fn">get</span>(<span class="str">'accessToken'</span>)?.value;
+  <span class="kw">const</span> isPublic = PUBLIC_ROUTES.<span class="fn">some</span>(r => req.nextUrl.pathname.<span class="fn">startsWith</span>(r));
+
+  <span class="kw">if</span> (!token && !isPublic) {
+    <span class="kw">return</span> NextResponse.<span class="fn">redirect</span>(<span class="kw">new</span> URL(<span class="str">'/login'</span>, req.url));
+  }
+  <span class="kw">if</span> (token && isPublic) {
+    <span class="kw">return</span> NextResponse.<span class="fn">redirect</span>(<span class="kw">new</span> URL(<span class="str">'/dashboard'</span>, req.url));
+  }
+  <span class="kw">return</span> NextResponse.<span class="fn">next</span>();
+}
+
+<span class="kw">export const</span> config = { matcher: [<span class="str">'/((?!api|_next|.*\\..*).*)'</span>] };</div>
+
+    <button class="ask-btn" onclick="sendPrompt('Can you write the complete errorHandler middleware that uses these custom error classes? ↗')">Show errorHandler middleware ↗</button>
+  </div>
+
+  <!-- PRINCIPLES TAB -->
+  <div id="tab-principles" class="tf-panel">
+    <div class="tf-section-title">The 12 restructuring rules</div>
+    <div class="principle-grid">
+      <div class="principle-card purple">
+        <div class="principle-num">01</div>
+        <div class="principle-title">Separation of concerns</div>
+        <div class="principle-desc">Router → Controller → Service → Repository. Each layer has one job and knows nothing about the layers below it except through interfaces.</div>
+      </div>
+      <div class="principle-card teal">
+        <div class="principle-num">02</div>
+        <div class="principle-title">Thin controllers</div>
+        <div class="principle-desc">Controllers extract request data and call services. If a controller has an <code>if</code> statement about business logic, it belongs in the service.</div>
+      </div>
+      <div class="principle-card amber">
+        <div class="principle-num">03</div>
+        <div class="principle-title">Custom error hierarchy</div>
+        <div class="principle-desc">Throw <code>NotFoundError</code> or <code>ForbiddenError</code> from services. The centralized error handler maps them to HTTP status codes.</div>
+      </div>
+      <div class="principle-card coral">
+        <div class="principle-num">04</div>
+        <div class="principle-title">Repository pattern</div>
+        <div class="principle-desc">All Prisma calls live in <code>*.repository.ts</code>. Switching databases means touching only those files — nothing else changes.</div>
+      </div>
+      <div class="principle-card blue">
+        <div class="principle-num">05</div>
+        <div class="principle-title">Barrel exports</div>
+        <div class="principle-desc">Every folder has an <code>index.ts</code> that re-exports everything. Imports become <code>from '@/services'</code> instead of deep relative paths.</div>
+      </div>
+      <div class="principle-card purple">
+        <div class="principle-num">06</div>
+        <div class="principle-title">Path aliases</div>
+        <div class="principle-desc">Configure <code>@/</code> in both <code>tsconfig.json</code> files. No more <code>../../../</code> — imports are readable and refactor-safe.</div>
+      </div>
+      <div class="principle-card teal">
+        <div class="principle-num">07</div>
+        <div class="principle-title">Validated env vars</div>
+        <div class="principle-desc">Parse and validate all env vars at startup in <code>config/env.ts</code> using Zod. Fail fast with a clear message rather than a cryptic runtime error.</div>
+      </div>
+      <div class="principle-card amber">
+        <div class="principle-num">08</div>
+        <div class="principle-title">Route-scoped components</div>
+        <div class="principle-desc">Components only used on one route live in <code>app/(app)/tasks/components/</code>. Shared components live in <code>components/shared/</code>.</div>
+      </div>
+      <div class="principle-card coral">
+        <div class="principle-num">09</div>
+        <div class="principle-title">React Query hooks</div>
+        <div class="principle-desc">No <code>fetch</code> or <code>axios</code> calls inside components. Extract to <code>useTasks.ts</code>, <code>useHabits.ts</code>. Components only call hooks and render data.</div>
+      </div>
+      <div class="principle-card blue">
+        <div class="principle-num">10</div>
+        <div class="principle-title">Frontend service layer</div>
+        <div class="principle-desc"><code>services/tasks.service.ts</code> holds all API calls. Hooks call services. If the API URL changes, you update one file — not a dozen hooks.</div>
+      </div>
+      <div class="principle-card purple">
+        <div class="principle-num">11</div>
+        <div class="principle-title">Zod-inferred types</div>
+        <div class="principle-desc">Use <code>z.infer&lt;typeof schema&gt;</code> to derive TypeScript types. Validation schema and type definition are always in sync — one source of truth.</div>
+      </div>
+      <div class="principle-card teal">
+        <div class="principle-num">12</div>
+        <div class="principle-title">Next.js middleware auth</div>
+        <div class="principle-desc">Replace client-side redirect logic with <code>middleware.ts</code>. Route protection happens at the edge — users never see a flash of protected content.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MIGRATION TAB -->
+  <div id="tab-migration" class="tf-panel">
+    <div class="tf-section-title">Before / after — controller pattern</div>
+    <div class="diff-row">
+      <div class="diff-before">
+        <div class="diff-label">Before — fat controller</div>
+<span style="color:var(--color-text-danger)">export const createTask = async (req, res) => {
+  const { title } = req.body;
+  // DB logic in controller
+  const max = await prisma.task.aggregate(...)
+  const task = await prisma.task.create({
+    data: { title, order: max+1, userId }
+  });
+  res.json({ success: true, data: task });
+};</span>
+      </div>
+      <div class="diff-after">
+        <div class="diff-label">After — thin controller</div>
+<span style="color:var(--color-text-success)">export const createTask = async (req, res, next) => {
+  try {
+    const task = await TaskService.create(
+      req.user!.id,
+      req.body
+    );
+    res.status(201).json(ApiResponse.success(task));
+  } catch (err) { next(err); }
+};</span>
+      </div>
+    </div>
+
+    <div class="tf-section-title">Before / after — frontend fetch</div>
+    <div class="diff-row">
+      <div class="diff-before">
+        <div class="diff-label">Before — fetch in component</div>
+<span style="color:var(--color-text-danger)">function TasksPage() {
+  const [tasks, setTasks] = useState([]);
+  useEffect(() => {
+    api.get('/tasks').then(r =>
+      setTasks(r.data.data.tasks)
+    );
+  }, []);
+  ...
+}</span>
+      </div>
+      <div class="diff-after">
+        <div class="diff-label">After — hook + service</div>
+<span style="color:var(--color-text-success)">function TasksPage() {
+  const { data, isLoading } = useTasks();
+  // TasksService.getAll() called inside the hook
+  // error handled by React Query
+  ...
+}</span>
+      </div>
+    </div>
+
+    <div class="tf-section-title">Step-by-step migration</div>
+    <div class="step-list">
+      <div class="step-item">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <div class="step-title">Add path aliases</div>
+          <div class="step-desc">Configure <code>@/*</code> in both <code>tsconfig.json</code> files. For Next.js, also add <code>paths</code> to <code>next.config.js</code>. Run the project to confirm no import errors.</div>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <div class="step-title">Create common/errors.ts</div>
+          <div class="step-desc">Write the error class hierarchy. Update <code>errorHandler.ts</code> to check <code>instanceof AppError</code> first, then Prisma errors, then default 500.</div>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <div class="step-title">Extract repositories (one module at a time)</div>
+          <div class="step-desc">Start with <code>tasks</code>. Move all <code>prisma.task.*</code> calls from the controller into <code>tasks.repository.ts</code>. Confirm tests pass before moving on.</div>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <div class="step-title">Create service layer</div>
+          <div class="step-desc">Move business logic from controllers to <code>tasks.service.ts</code>. Controller becomes: extract params → call service → send response. Replace <code>res.status(500)</code> with <code>throw new AppError(...)</code>.</div>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">5</div>
+        <div class="step-content">
+          <div class="step-title">Add barrel exports</div>
+          <div class="step-desc">Create <code>index.ts</code> in every folder that re-exports its public surface. Update all imports to use the short alias form.</div>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">6</div>
+        <div class="step-content">
+          <div class="step-title">Create frontend services + hooks</div>
+          <div class="step-desc">Move axios calls from components into <code>services/*.service.ts</code>. Create React Query hooks in <code>hooks/</code>. Refactor page components to call hooks only.</div>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">7</div>
+        <div class="step-content">
+          <div class="step-title">Add Next.js middleware.ts</div>
+          <div class="step-desc">Replace client-side auth redirect logic with a root <code>middleware.ts</code>. Remove <code>useEffect</code> redirect guards from layout components.</div>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">8</div>
+        <div class="step-content">
+          <div class="step-title">Move tokens to httpOnly cookies</div>
+          <div class="step-desc">Store JWT tokens in <code>httpOnly</code> cookies (set by the backend) instead of <code>localStorage</code>. Eliminates XSS token theft risk. Update <code>middleware.ts</code> to read cookies instead.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tf-note">
+      <strong>Incremental approach:</strong> Migrate one module at a time (start with <code>tasks</code>). Each module can be restructured independently — you don't need to change everything at once. The architecture is stable as soon as the contracts between layers (function signatures) are defined.
+    </div>
+
+    <button class="ask-btn" onclick="sendPrompt('Can you show me the complete config/env.ts with Zod validation for all environment variables? ↗')">Show env.ts with Zod validation ↗</button>
+    <br>
+    <button class="ask-btn" onclick="sendPrompt('Can you write the complete errorHandler middleware that works with the custom AppError classes? ↗')">Show complete errorHandler ↗</button>
+    <br>
+    <button class="ask-btn" onclick="sendPrompt('Can you generate the complete tasks module with router, controller, service, and repository all wired together? ↗')">Generate complete tasks module ↗</button>
+  </div>
+</div>
+
+<script>
+function showTab(name) {
+  document.querySelectorAll('.tf-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tf-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
